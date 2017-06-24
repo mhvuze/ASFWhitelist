@@ -12,6 +12,7 @@ namespace ASFWhitelist
     public partial class Form1 : Form
     {
         const string APP_LIST_FILE = "applist.txt";
+        string ASF_CONFIG = "";
         bool sortAscending = false;
         List<string> current_apps = new List<string>();
         List<string> blacklist = new List<string>();
@@ -61,10 +62,11 @@ namespace ASFWhitelist
             this.listViewGames.ListViewItemSorter = new ListViewItemComparer(e.Column, sortAscending);
         }
 
-        // Save blacklist to ASF config *wip*
+        // Save blacklist to ASF config
         private void buttonSaveList_Click(object sender, EventArgs e)
         {
-            StreamWriter writer = new StreamWriter("ASF.json", false);
+            StreamWriter writer = new StreamWriter(ASF_CONFIG, false);
+            int count = 1;
 
             // Write start from original config
             foreach (string str in new_config_start)
@@ -80,7 +82,16 @@ namespace ASFWhitelist
 
             foreach (string app in blacklist)
             {
-                writer.WriteLine("    " + app + ",");
+                if (count < blacklist.Count)
+                {
+                    writer.WriteLine("    " + app + ",");
+                }
+                else
+                {
+                    writer.WriteLine("    " + app);
+                }
+                
+                count++;
             }
 
             // Write end from original config
@@ -102,8 +113,8 @@ namespace ASFWhitelist
             {
                 int lineBlacklist = 1;
                 int lineBlacklistEnd = 1;
-                string file = openFileDialogConfig.FileName;
-                string[] temp = File.ReadAllLines(file);
+                ASF_CONFIG = openFileDialogConfig.FileName;
+                string[] temp = File.ReadAllLines(ASF_CONFIG);
 
                 // Save everything before blacklist block to new_config_start
                 foreach (string str in temp)
@@ -134,14 +145,10 @@ namespace ASFWhitelist
                 }
 
                 // Save everything after blacklist block to new_config_end
-                int add = 0;
-                for (int i = 0; i < temp.Length - lineBlacklistEnd; i++)
+                for (int i = 0; i < temp.Length + 1 - lineBlacklistEnd; i++)
                 {
                     new_config_end.Add(temp[lineBlacklistEnd - 1 + i]);
                 }
-
-                Console.WriteLine(lineBlacklist);
-                Console.WriteLine(lineBlacklistEnd);
 
                 labelStatus.Text = "Base ASF config loaded.";
                 buttonSaveList.Enabled = true;
@@ -170,6 +177,7 @@ namespace ASFWhitelist
                     l1.SubItems.Add(appid);
                     l1.SubItems.Add(name);
                     writer.WriteLine(appid + "\t" + name);
+                    current_apps.Add(appid);
 
                     count++;
                 }
