@@ -38,6 +38,7 @@
             this.buttonSaveList = new System.Windows.Forms.Button();
             this.labelStatus = new System.Windows.Forms.Label();
             this.buttonUpdate = new System.Windows.Forms.Button();
+            this.openFileDialogConfig = new System.Windows.Forms.OpenFileDialog();
             this.SuspendLayout();
             // 
             // listViewGames
@@ -97,9 +98,11 @@
             this.buttonOpenASFconfig.TabIndex = 4;
             this.buttonOpenASFconfig.Text = "Open ASF config";
             this.buttonOpenASFconfig.UseVisualStyleBackColor = true;
+            this.buttonOpenASFconfig.Click += new System.EventHandler(this.buttonOpenASFconfig_Click);
             // 
             // buttonSaveList
             // 
+            this.buttonSaveList.Enabled = false;
             this.buttonSaveList.Location = new System.Drawing.Point(747, 86);
             this.buttonSaveList.Name = "buttonSaveList";
             this.buttonSaveList.Size = new System.Drawing.Size(140, 23);
@@ -119,12 +122,17 @@
             // 
             // buttonUpdate
             // 
-            this.buttonUpdate.Location = new System.Drawing.Point(750, 116);
+            this.buttonUpdate.Location = new System.Drawing.Point(747, 115);
             this.buttonUpdate.Name = "buttonUpdate";
-            this.buttonUpdate.Size = new System.Drawing.Size(136, 23);
+            this.buttonUpdate.Size = new System.Drawing.Size(140, 23);
             this.buttonUpdate.TabIndex = 7;
             this.buttonUpdate.Text = "Update Apps";
             this.buttonUpdate.UseVisualStyleBackColor = true;
+            // 
+            // openFileDialogConfig
+            // 
+            this.openFileDialogConfig.FileName = "ASF.json";
+            this.openFileDialogConfig.Filter = "JSON files|*.json";
             // 
             // Form1
             // 
@@ -159,6 +167,7 @@
         private System.Windows.Forms.Button buttonSaveList;
         private System.Windows.Forms.Label labelStatus;
         private System.Windows.Forms.Button buttonUpdate;
+        private System.Windows.Forms.OpenFileDialog openFileDialogConfig;
     }
 }
 
