@@ -128,6 +128,7 @@
             this.buttonUpdate.TabIndex = 7;
             this.buttonUpdate.Text = "Update Apps";
             this.buttonUpdate.UseVisualStyleBackColor = true;
+            this.buttonUpdate.Click += new System.EventHandler(this.buttonUpdate_Click);
             // 
             // openFileDialogConfig
             // 

@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.IO;
+using System.Net;
+using Newtonsoft.Json.Linq;
+using System.Linq;
+using HtmlAgilityPack;
 
 namespace ASFWhitelist
 {
@@ -9,6 +13,7 @@ namespace ASFWhitelist
     {
         const string APP_LIST_FILE = "applist.txt";
         bool sortAscending = false;
+        List<string> current_apps = new List<string>();
         List<string> blacklist = new List<string>();
         List<string> new_config_start = new List<string>();
         List<string> new_config_end = new List<string>();
@@ -25,6 +30,7 @@ namespace ASFWhitelist
             string[] gameList = File.ReadAllLines(APP_LIST_FILE);
             foreach (string game in gameList)
             {
+                current_apps.Add(game.Split('\t')[0]);
                 ListViewItem l1 = listViewGames.Items.Add("");
                 l1.SubItems.Add(game.Split('\t')[0]);
                 l1.SubItems.Add(game.Split('\t')[1]);
@@ -140,6 +146,68 @@ namespace ASFWhitelist
                 labelStatus.Text = "Base ASF config loaded.";
                 buttonSaveList.Enabled = true;
             }
+        }
+
+        // Update applist
+        private void buttonUpdate_Click(object sender, EventArgs e)
+        {
+            StreamWriter writer = new StreamWriter("applist.txt", true);
+            int count = 0;
+
+            var apiJson = new StreamReader(
+                WebRequest.Create(
+                "http://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=YOURWEBAPIKEY&steamid=YOURSTEAMID&l=english&json")
+                .GetResponse().GetResponseStream()).ReadToEnd();
+            var gamesList = JObject.Parse(apiJson)["response"]["games"].Children().Select(current => current.SelectToken("appid").ToString()).ToList();
+
+            foreach (string appid in gamesList)
+            {
+                if (!current_apps.Contains(appid))
+                {
+                    string name = gameName(appid);
+
+                    ListViewItem l1 = listViewGames.Items.Add("");
+                    l1.SubItems.Add(appid);
+                    l1.SubItems.Add(name);
+                    writer.WriteLine(appid + "\t" + name);
+
+                    count++;
+                }
+            }
+
+            labelStatus.Text = count + " new apps found.";
+            writer.Close();
+        }
+
+        // Fetch game name
+        public static string gameName(string appid)
+        {
+            string game_name = "";
+            var url = "http://store.steampowered.com/app/" + appid;
+            try
+            {
+                game_name = new HtmlWeb().Load(url)
+                    .DocumentNode
+                    .SelectSingleNode("/html/body/div[1]/div[7]/div[3]/div[1]/div[2]/div[2]/div[2]/div/div[3]")
+                    .InnerText;
+            }
+            catch
+            {
+                try
+                {
+                    // SteamDB doesn't like this and may ban your IP, use with caution and respect
+                    var url2 = "https://steamdb.info/app/" + appid;
+                    game_name = new HtmlWeb().Load(url2)
+                        .DocumentNode
+                        .SelectSingleNode("/html/body/div[1]/div[2]/div/div/div[2]/div[1]/table/tbody/tr[3]/td[2]")
+                        .InnerText;
+                }
+                catch
+                {
+                    game_name = "Name not available";
+                }
+            }
+            return game_name;
         }
     }
 }
